@@ -15,6 +15,14 @@
         $xml->startElement('instruction');
         $xml->writeAttribute('order', $idx);
         $xml->writeAttribute('opcode', $opcode);
+        // $xml->endElement();
+    }
+
+    function write_op($xml,$num,$type,$value)
+    {
+        $xml->startElement('arg'.$num);
+        $xml->writeAttribute('type', $type);
+        $xml->text($value);
         $xml->endElement();
     }
 
@@ -83,20 +91,22 @@
             case "POPFRAME":
             case "BREAK":
             case "RETURN":
-                write_instr($xml_buffer,$idx++,$tokens[0]);
+                write_instr($xml_buffer,++$idx,$tokens[0]);
                 break;
 
             ## label
             case "CALL":
             case "LABEL":
             case "JUMP":
-                write_instr($xml_buffer, $idx++, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer,1,'label',$tokens[1]);
                 break;
 
             ##var
             case "DEFVAR":
             case "POPS":
-                write_instr($xml_buffer, $idx++, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer, 1, 'var', $tokens[1]);
                 break;
 
             ## symb
@@ -104,7 +114,8 @@
             case "WRITE":
             case "EXIT":
             case "DPRINT":
-                write_instr($xml_buffer, $idx++, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer, 1, 'symb', $tokens[1]);
                 break;
 
             ## var symb
@@ -112,7 +123,7 @@
             case "INT2CHAR":
             case "STRLEN":
             case "TYPE":
-                write_instr($xml_buffer, $idx++, $tokens[0]);       
+                write_instr($xml_buffer, ++$idx, $tokens[0]);       
                 break;
 
             ## var symb symb
@@ -130,24 +141,25 @@
             case "CONCAT":
             case "GETCHAR":
             case "SETCHAR":
-                write_instr($xml_buffer, $idx++, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
                 break;
 
             ## var type
             case "READ":
-                write_instr($xml_buffer, $idx++, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
             break;
 
             ## label symb
             case "JMPIFEQ":
             case "JMPIFNEQ":
-                write_instr($xml_buffer, $idx++, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
             break;
 
             default:
                 ##error TODO
                 break;
         }
+        $xml_buffer->endElement();
     }
 
 
