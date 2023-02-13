@@ -21,7 +21,8 @@
         }
         else exit(ERR_PARAM);
     }
-    
+
+
     $xml_buffer = new XMLWriter();
 
     if(!$xml_buffer->openMemory())
@@ -51,10 +52,87 @@
         exit(ERR_INTERNAL);
     }
 
+    $header_found = false;
+
     while($line = fgets(STDIN))
     {
+        if(!$header_found)
+        {
+            if(strtolower($line) == ".ippcode23")
+            {
+                $header_found = true;
+            }
+        }
+
+        $tokens = explode(' ',trim($line,"\n"),);
         
+        switch(strtoupper($tokens[0]))
+        {
+            ## no op
+            case "CREATEFRAME":
+            case "PUSHFRAME":
+            case "POPFRAME":
+            case "BREAK":
+            case "RETURN":
+                break;
+
+            ## label
+            case "CALL":
+            case "LABEL":
+            case "JUMP":
+                break;
+
+            ##var
+            case "DEFVAR":
+            case "POPS":
+                break;
+
+            ## symb
+            case "PUSHS":
+            case "WRITE":
+            case "EXIT":
+            case "DPRINT":
+                break;
+
+            ## var symb
+            case "MOVE":
+            case "INT2CHAR":
+            case "STRLEN":
+            case "TYPE":
+                break;
+
+            ## var symb symb
+            case "ADD":
+            case "SUB":
+            case "MUL":
+            case "IDIV":
+            case "LT":
+            case "GT":
+            case "EQ":
+            case "AND":
+            case "OR":
+            case "NOT":
+            case "STRI2INT":
+            case "CONCAT":
+            case "GETCHAR":
+            case "SETCHAR":
+                break;
+
+            ## var type
+            case "READ":
+            break;
+
+            ## label symb
+            case "JMPIFEQ":
+            case "JMPIFNEQ":
+            break;
+
+            default:
+                ##error TODO
+                break;
+        }
     }
+
 
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
