@@ -50,23 +50,11 @@
         exit(ERR_INTERNAL);
     }
 
-    if(!$xml_buffer->setIndent(true))
-    {
-        $xml_buffer->flush();
-        exit(ERR_INTERNAL);
-    }
+    $xml_buffer->setIndent(true);
+    $xml_buffer->setIndentString("\t");
 
-    if(!$xml_buffer->startElement('program'))
-    {
-        $xml_buffer->flush();
-        exit(ERR_INTERNAL);
-    }
-
-    if(!$xml_buffer->writeAttribute('language', 'IPPcode23')) 
-    {
-        $xml_buffer->flush();
-        exit(ERR_INTERNAL);
-    }
+    $xml_buffer->startElement('program');
+    $xml_buffer->writeAttribute('language', 'IPPcode23');
 
     $header_found = false;
     $idx = 0;
@@ -83,7 +71,7 @@
 
         $tokens = explode(' ',trim($line,"\n"),);
 
-        switch(strtoupper($tokens[0]))
+        switch($tokens[0] = strtoupper($tokens[0]))
         {
             ## no op
             case "CREATEFRAME":
@@ -123,7 +111,9 @@
             case "INT2CHAR":
             case "STRLEN":
             case "TYPE":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);       
+                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer, 1, 'var', $tokens[1]);
+                write_op($xml_buffer, 2, 'symb', $tokens[2]);       
                 break;
 
             ## var symb symb
@@ -142,17 +132,24 @@
             case "GETCHAR":
             case "SETCHAR":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer, 1, 'var', $tokens[1]);
+                write_op($xml_buffer, 2, 'symb', $tokens[2]);   
+                write_op($xml_buffer, 3, 'symb', $tokens[3]); 
                 break;
 
             ## var type
             case "READ":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer, 1, 'var', $tokens[1]);
+                write_op($xml_buffer, 2, 'type', $tokens[2]);
             break;
 
             ## label symb
             case "JMPIFEQ":
             case "JMPIFNEQ":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_op($xml_buffer, 1, 'label', $tokens[1]);
+                write_op($xml_buffer, 2, 'symb', $tokens[2]);
             break;
 
             default:
@@ -162,11 +159,9 @@
         $xml_buffer->endElement();
     }
 
-
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
 
     echo($xml_buffer->outputMemory(true));
-
     exit(SUCCESS);
 ?>
