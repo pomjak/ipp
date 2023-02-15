@@ -103,7 +103,8 @@
             case "EXIT":
             case "DPRINT":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
-                write_op($xml_buffer, 1, 'symb', $tokens[1]);
+                $symb = explode('@', $tokens[1],);
+                write_op($xml_buffer, 1, $symb[0], $symb[1]);
                 break;
 
             ## var symb
@@ -113,7 +114,8 @@
             case "TYPE":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
-                write_op($xml_buffer, 2, 'symb', $tokens[2]);       
+                $symb = explode('@', $tokens[2],);
+                write_op($xml_buffer, 2, $symb[0], $symb[1]);      
                 break;
 
             ## var symb symb
@@ -161,7 +163,9 @@
 
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
-
+    
     echo($xml_buffer->outputMemory(true));
+    $xml_buffer->flush();
+    
     exit(SUCCESS);
 ?>
