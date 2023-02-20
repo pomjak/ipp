@@ -51,7 +51,7 @@
     }
 
     $xml_buffer->setIndent(true);
-    $xml_buffer->setIndentString("\t");
+    $xml_buffer->setIndentString("    ");
 
     $xml_buffer->startElement('program');
     $xml_buffer->writeAttribute('language', 'IPPcode23');
@@ -80,6 +80,8 @@
             case "BREAK":
             case "RETURN":
                 write_instr($xml_buffer,++$idx,$tokens[0]);
+                $xml_buffer->endElement();
+
                 break;
 
             ## label
@@ -88,6 +90,8 @@
             case "JUMP":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
                 write_op($xml_buffer,1,'label',$tokens[1]);
+                $xml_buffer->endElement();
+
                 break;
 
             ##var
@@ -95,6 +99,8 @@
             case "POPS":
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
+                $xml_buffer->endElement();
+
                 break;
 
             ## symb
@@ -105,6 +111,8 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
                 $symb = explode('@', $tokens[1],);
                 write_op($xml_buffer, 1, $symb[0], $symb[1]);
+                $xml_buffer->endElement();
+
                 break;
 
             ## var symb
@@ -116,6 +124,8 @@
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 $symb = explode('@', $tokens[2],);
                 write_op($xml_buffer, 2, $symb[0], $symb[1]);      
+                $xml_buffer->endElement();
+
                 break;
 
             ## var symb symb
@@ -137,6 +147,8 @@
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 write_op($xml_buffer, 2, 'symb', $tokens[2]);   
                 write_op($xml_buffer, 3, 'symb', $tokens[3]); 
+                $xml_buffer->endElement();
+
                 break;
 
             ## var type
@@ -144,7 +156,9 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 write_op($xml_buffer, 2, 'type', $tokens[2]);
-            break;
+                $xml_buffer->endElement();
+
+                break;
 
             ## label symb
             case "JMPIFEQ":
@@ -152,13 +166,14 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0]);
                 write_op($xml_buffer, 1, 'label', $tokens[1]);
                 write_op($xml_buffer, 2, 'symb', $tokens[2]);
-            break;
+                $xml_buffer->endElement();
+
+                break;
 
             default:
                 ##error TODO
                 break;
         }
-        $xml_buffer->endElement();
     }
 
     $xml_buffer->endElement();
