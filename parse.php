@@ -10,12 +10,20 @@
     define("ERR_SYNTAX", 23);
     define("ERR_INTERNAL", 99);
 
-    function write_instr($xml,$idx,$opcode)
+    enum Args
     {
+        case type;
+        case symb;
+        case var;
+        case label;
+    }
+
+    function write_instr($xml,$idx,$opcode,$head)
+    {
+        if(!$head) exit(ERR_BAD_HEADER);
         $xml->startElement('instruction');
         $xml->writeAttribute('order', $idx);
         $xml->writeAttribute('opcode', $opcode);
-        // $xml->endElement();
     }
 
     function write_op($xml,$num,$type,$value)
@@ -24,6 +32,11 @@
         $xml->writeAttribute('type', $type);
         $xml->text($value);
         $xml->endElement();
+    }
+
+    function strip_comment($line)
+    {
+        return ( (strstr($line,'#',true) ) ? trim( (strstr($line, '#', true))) : trim($line) );
     }
 
     if($argc > 1)
@@ -37,7 +50,6 @@
         }
         else exit(ERR_PARAM);
     }
-
 
     $xml_buffer = new XMLWriter();
 
@@ -61,25 +73,25 @@
 
     while($line = fgets(STDIN))
     {
-        if(!$header_found)
-        {
-            if(strtolower($line) == ".ippcode23")
-            {
-                $header_found = true;
-            }
-        }
+        $line = strip_comment($line);
 
-        $tokens = explode(' ',trim($line,"\n"),);
+        $tokens = explode(' ',$line,);
 
         switch($tokens[0] = strtoupper($tokens[0]))
         {
+            case ".IPPCODE23":
+                if (!$header_found)
+                    $header_found = true;
+                else 
+                    exit (ERR_OPCODE);
+                break;
             ## no op
             case "CREATEFRAME":
             case "PUSHFRAME":
             case "POPFRAME":
             case "BREAK":
             case "RETURN":
-                write_instr($xml_buffer,++$idx,$tokens[0]);
+                write_instr($xml_buffer,++$idx,$tokens[0],$header_found);
                 $xml_buffer->endElement();
 
                 break;
@@ -88,7 +100,7 @@
             case "CALL":
             case "LABEL":
             case "JUMP":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer,1,'label',$tokens[1]);
                 $xml_buffer->endElement();
 
@@ -97,7 +109,7 @@
             ##var
             case "DEFVAR":
             case "POPS":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 $xml_buffer->endElement();
 
@@ -108,7 +120,7 @@
             case "WRITE":
             case "EXIT":
             case "DPRINT":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 $symb = explode('@', $tokens[1],);
                 write_op($xml_buffer, 1, $symb[0], $symb[1]);
                 $xml_buffer->endElement();
@@ -120,7 +132,7 @@
             case "INT2CHAR":
             case "STRLEN":
             case "TYPE":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 $symb = explode('@', $tokens[2],);
                 write_op($xml_buffer, 2, $symb[0], $symb[1]);      
@@ -143,7 +155,7 @@
             case "CONCAT":
             case "GETCHAR":
             case "SETCHAR":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 write_op($xml_buffer, 2, 'symb', $tokens[2]);   
                 write_op($xml_buffer, 3, 'symb', $tokens[3]); 
@@ -153,7 +165,7 @@
 
             ## var type
             case "READ":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
                 write_op($xml_buffer, 2, 'type', $tokens[2]);
                 $xml_buffer->endElement();
@@ -163,7 +175,7 @@
             ## label symb
             case "JMPIFEQ":
             case "JMPIFNEQ":
-                write_instr($xml_buffer, ++$idx, $tokens[0]);
+                write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer, 1, 'label', $tokens[1]);
                 write_op($xml_buffer, 2, 'symb', $tokens[2]);
                 $xml_buffer->endElement();
@@ -171,10 +183,11 @@
                 break;
 
             default:
-                ##error TODO
                 break;
         }
     }
+
+    if(!$header_found) exit(ERR_BAD_HEADER);
 
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
