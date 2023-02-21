@@ -37,12 +37,12 @@
         if(strstr($line, '#', true))
         {
             $line = strstr($line, '#', true);
-            // $line = preg_replace("/^  $/", " ",$line);
+            $line = preg_replace('/\s\s+/', ' ', $line);
             $line = trim($line);
         }
         else
         {
-            // $line = preg_replace("/^  $/", " ", $line);
+            $line = preg_replace('/\s\s+/', ' ', $line);
             $line = trim($line);
         }
         return $line;
@@ -92,7 +92,7 @@
                     break;
 
                 case "string":
-                    if (preg_match("/^([^\\\]|\\\d{3})*$/", $const_sub[1]))
+                    if (preg_match("/^([^\\\]|[\\\][\d]{3})*$/", $const_sub[1]))
                         write_op($xml, $order, $const_sub[0], $const_sub[1]);
                     else err_msg("err: const_check: $const_sub[1] bad syntax", ERR_SYNTAX);
                     break;
@@ -213,6 +213,7 @@
             case "INT2CHAR":
             case "STRLEN":
             case "TYPE":
+            case "NOT":
                 if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
@@ -232,7 +233,6 @@
             case "EQ":
             case "AND":
             case "OR":
-            case "NOT":
             case "STRI2INT":
             case "CONCAT":
             case "GETCHAR":
@@ -255,13 +255,14 @@
 
                 break;
 
-            ## label symb
+            ## label symb symb
             case "JUMPIFEQ":
             case "JUMPIFNEQ":
-                if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+                if (count($tokens) != 4 ) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1], $xml_buffer);
                 symb_check($tokens[2], $xml_buffer,2);
+                symb_check($tokens[3], $xml_buffer, 3);
                 $xml_buffer->endElement();
 
                 break;
