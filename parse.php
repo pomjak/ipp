@@ -39,6 +39,23 @@
         return ( (strstr($line,'#',true) ) ? trim( (strstr($line, '#', true))) : trim($line) );
     }
 
+    function label_check($token,$xml)
+    {
+        if( preg_match("/^[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/",$token) )
+        {
+            write_op($xml, 1, 'label', $token);
+        }
+        else exit(ERR_SYNTAX);
+    }
+    
+    function type_check($token,$xml)
+    {
+        if( preg_match("/^(nil|bool|int)$/",$token) )
+            write_op($xml, 2, 'type', $token);
+        else 
+            exit(ERR_SYNTAX);
+    }
+
     if($argc > 1)
     {
         if($argv[1] == '--help' && $argc == 2)
@@ -101,7 +118,7 @@
             case "LABEL":
             case "JUMP":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                write_op($xml_buffer,1,'label',$tokens[1]);
+                label_check($tokens[1],$xml_buffer);
                 $xml_buffer->endElement();
 
                 break;
@@ -167,7 +184,7 @@
             case "READ":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 write_op($xml_buffer, 1, 'var', $tokens[1]);
-                write_op($xml_buffer, 2, 'type', $tokens[2]);
+                type_check($tokens[2],$xml_buffer);
                 $xml_buffer->endElement();
 
                 break;
@@ -176,7 +193,7 @@
             case "JMPIFEQ":
             case "JMPIFNEQ":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                write_op($xml_buffer, 1, 'label', $tokens[1]);
+                label_check($tokens[1], $xml_buffer);
                 write_op($xml_buffer, 2, 'symb', $tokens[2]);
                 $xml_buffer->endElement();
 
