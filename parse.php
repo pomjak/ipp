@@ -10,17 +10,15 @@
     define("ERR_SYNTAX", 23);
     define("ERR_INTERNAL", 99);
 
-    enum Args
+    function err_msg($msg,$err_code)
     {
-        case type;
-        case symb;
-        case var;
-        case label;
+        fprintf(STDERR,$msg);
+        exit($err_code);
     }
 
     function write_instr($xml,$idx,$opcode,$head)
     {
-        if(!$head) exit(ERR_BAD_HEADER);
+        if(!$head) err_msg("err: header: bad header", ERR_BAD_HEADER);
         $xml->startElement('instruction');
         $xml->writeAttribute('order', $idx);
         $xml->writeAttribute('opcode', $opcode);
@@ -44,28 +42,58 @@
         if( preg_match("/^[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/",$token) )
             write_op($xml, 1, 'label', $token);
         else 
-            exit(ERR_SYNTAX);
+            err_msg("err: label_check: $token bad syntax",ERR_SYNTAX);
     }
     
     function type_check($token,$xml)
     {
         if( preg_match("/^(nil|bool|int)$/",$token) )
             write_op($xml, 2, 'type', $token);
-        else 
-            exit(ERR_SYNTAX);
+        else
+            err_msg("err: type_check: $token bad syntax", ERR_SYNTAX);
     }
 
     function var_check($token,$xml,$order)
     {
         if (preg_match("/^(GF|LF|TF)@[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/", $token))
             write_op($xml, $order, 'var', $token);
-        else 
-            exit(ERR_SYNTAX);
+        else
+            err_msg("err: var_check: $token bad syntax", ERR_SYNTAX);
     }
 
     function const_check($token,$xml,$order)
     {
+        $const_sub = explode('@',$token);
+        if( preg_match( "/^(nil|int|string|bool)$/" , $const_sub[0]) )
+        {
+            switch($const_sub[0])
+            {
+                case "int":
+                    if(preg_match("/^[+-]?[0-9]+$/",$const_sub[1]))
+                        write_op($xml, $order, $const_sub[0], $const_sub[1]);
+                    else err_msg("err: const_check: $const_sub[1] bad syntax", ERR_SYNTAX);
+                    break;
 
+                case "nil":
+                    if (preg_match("/^nil$/", $const_sub[1]))
+                        write_op($xml, $order, $const_sub[0], $const_sub[1]);
+                    else err_msg("err: const_check: $const_sub[1] bad syntax", ERR_SYNTAX);
+                    break;
+
+                case "string":
+                    if (preg_match("/^([^\\\]|\\\d{3})*$/", $const_sub[1]))
+                        write_op($xml, $order, $const_sub[0], $const_sub[1]);
+                    else err_msg("err: const_check: $const_sub[1] bad syntax", ERR_SYNTAX);
+                    break;
+
+                case "bool":
+                    if (preg_match("/^(true|false)$/", $const_sub[1]))
+                        write_op($xml, $order, $const_sub[0], $const_sub[1]);
+                    else err_msg("err: const_check: $const_sub[1] bad syntax", ERR_SYNTAX);
+                break;
+            }
+        }
+        else err_msg("err: const_check: $token bad syntax", ERR_SYNTAX);
     }
 
     function symb_check($token,$xml,$order)
@@ -86,7 +114,7 @@
             echo("Tento skript pracuje s temito parametry:\n\t--help \t vypise tuto napovedu\n");
             exit(SUCCESS);
         }
-        else exit(ERR_PARAM);
+    else err_msg("err:param_check :bad params", ERR_PARAM);
     }
 
     $xml_buffer = new XMLWriter();
@@ -120,8 +148,8 @@
             case ".IPPCODE23":
                 if (!$header_found)
                     $header_found = true;
-                else 
-                    exit (ERR_OPCODE);
+                else
+                    err_msg("err: header : double header", ERR_OPCODE);
                 break;
             ## no op
             case "CREATEFRAME":
@@ -223,7 +251,7 @@
         }
     }
 
-    if(!$header_found) exit(ERR_BAD_HEADER);
+    if(!$header_found) err_msg("err: header :missing header", ERR_BAD_HEADER);;
 
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
