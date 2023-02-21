@@ -12,7 +12,7 @@
 
     function err_msg($msg,$err_code)
     {
-        fprintf(STDERR,$msg);
+        fprintf(STDERR,"$msg\n");
         exit($err_code);
     }
 
