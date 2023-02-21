@@ -42,10 +42,9 @@
     function label_check($token,$xml)
     {
         if( preg_match("/^[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/",$token) )
-        {
             write_op($xml, 1, 'label', $token);
-        }
-        else exit(ERR_SYNTAX);
+        else 
+            exit(ERR_SYNTAX);
     }
     
     function type_check($token,$xml)
@@ -54,6 +53,28 @@
             write_op($xml, 2, 'type', $token);
         else 
             exit(ERR_SYNTAX);
+    }
+
+    function var_check($token,$xml,$order)
+    {
+        if (preg_match("/^(GF|LF|TF)@[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/", $token))
+            write_op($xml, $order, 'var', $token);
+        else 
+            exit(ERR_SYNTAX);
+    }
+
+    function const_check($token,$xml,$order)
+    {
+
+    }
+
+    function symb_check($token,$xml,$order)
+    {
+        $symb = explode('@',$token);
+        if (preg_match("/^(GF|LF|TF)$/", $symb[0]))
+            var_check($token,$xml,$order);
+        else
+            const_check($token, $xml,$order);
     }
 
     if($argc > 1)
@@ -127,7 +148,7 @@
             case "DEFVAR":
             case "POPS":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                write_op($xml_buffer, 1, 'var', $tokens[1]);
+                var_check($tokens[1], $xml_buffer,1);
                 $xml_buffer->endElement();
 
                 break;
@@ -138,8 +159,7 @@
             case "EXIT":
             case "DPRINT":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                $symb = explode('@', $tokens[1],);
-                write_op($xml_buffer, 1, $symb[0], $symb[1]);
+                symb_check($tokens[1],$xml_buffer,1);
                 $xml_buffer->endElement();
 
                 break;
@@ -150,9 +170,8 @@
             case "STRLEN":
             case "TYPE":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                write_op($xml_buffer, 1, 'var', $tokens[1]);
-                $symb = explode('@', $tokens[2],);
-                write_op($xml_buffer, 2, $symb[0], $symb[1]);      
+                var_check($tokens[1], $xml_buffer,1);
+                symb_check($tokens[2], $xml_buffer,2);
                 $xml_buffer->endElement();
 
                 break;
@@ -173,9 +192,9 @@
             case "GETCHAR":
             case "SETCHAR":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                write_op($xml_buffer, 1, 'var', $tokens[1]);
-                write_op($xml_buffer, 2, 'symb', $tokens[2]);   
-                write_op($xml_buffer, 3, 'symb', $tokens[3]); 
+                var_check($tokens[1], $xml_buffer,1);
+                symb_check($tokens[2], $xml_buffer,2);
+                symb_check($tokens[3], $xml_buffer,3);
                 $xml_buffer->endElement();
 
                 break;
@@ -183,7 +202,7 @@
             ## var type
             case "READ":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
-                write_op($xml_buffer, 1, 'var', $tokens[1]);
+                var_check($tokens[1], $xml_buffer,1);
                 type_check($tokens[2],$xml_buffer);
                 $xml_buffer->endElement();
 
@@ -194,7 +213,7 @@
             case "JMPIFNEQ":
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1], $xml_buffer);
-                write_op($xml_buffer, 2, 'symb', $tokens[2]);
+                symb_check($tokens[2], $xml_buffer,2);
                 $xml_buffer->endElement();
 
                 break;
