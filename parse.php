@@ -34,7 +34,18 @@
 
     function strip_comment($line)
     {
-        return ( (strstr($line,'#',true) ) ? trim( (strstr($line, '#', true))) : trim($line) );
+        if(strstr($line, '#', true))
+        {
+            $line = strstr($line, '#', true);
+            // $line = preg_replace("/^  $/", " ",$line);
+            $line = trim($line);
+        }
+        else
+        {
+            // $line = preg_replace("/^  $/", " ", $line);
+            $line = trim($line);
+        }
+        return $line;
     }
 
     function label_check($token,$xml)
@@ -139,6 +150,7 @@
 
     while($line = fgets(STDIN))
     {
+        if($line[0] == '#') continue;
         $line = strip_comment($line);
 
         $tokens = explode(' ',$line,);
@@ -157,6 +169,7 @@
             case "POPFRAME":
             case "BREAK":
             case "RETURN":
+                if( count($tokens) != 1 ) err_msg("bad num of op : count($tokens)",ERR_SYNTAX);
                 write_instr($xml_buffer,++$idx,$tokens[0],$header_found);
                 $xml_buffer->endElement();
 
@@ -166,6 +179,7 @@
             case "CALL":
             case "LABEL":
             case "JUMP":
+                if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1],$xml_buffer);
                 $xml_buffer->endElement();
@@ -175,6 +189,7 @@
             ##var
             case "DEFVAR":
             case "POPS":
+                if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 $xml_buffer->endElement();
@@ -186,6 +201,7 @@
             case "WRITE":
             case "EXIT":
             case "DPRINT":
+                if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 symb_check($tokens[1],$xml_buffer,1);
                 $xml_buffer->endElement();
@@ -197,6 +213,7 @@
             case "INT2CHAR":
             case "STRLEN":
             case "TYPE":
+                if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
@@ -205,6 +222,7 @@
                 break;
 
             ## var symb symb
+            if (count($tokens) != 4) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
             case "ADD":
             case "SUB":
             case "MUL":
@@ -229,6 +247,7 @@
 
             ## var type
             case "READ":
+                if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 type_check($tokens[2],$xml_buffer);
@@ -237,8 +256,9 @@
                 break;
 
             ## label symb
-            case "JMPIFEQ":
-            case "JMPIFNEQ":
+            case "JUMPIFEQ":
+            case "JUMPIFNEQ":
+                if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1], $xml_buffer);
                 symb_check($tokens[2], $xml_buffer,2);
@@ -247,11 +267,12 @@
                 break;
 
             default:
+                err_msg("err: switch :unrecognized command $tokens[0]", ERR_OPCODE);
                 break;
         }
     }
 
-    if(!$header_found) err_msg("err: header :missing header", ERR_BAD_HEADER);;
+    if(!$header_found) err_msg("err: header :missing header", ERR_BAD_HEADER);
 
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
