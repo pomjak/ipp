@@ -32,7 +32,7 @@
         $xml->endElement();
     }
 
-    function strip_comment($line)
+    function strip($line)
     {
         if(strstr($line, '#', true))
         {
@@ -58,7 +58,7 @@
     
     function type_check($token,$xml)
     {
-        if( preg_match("/^(nil|bool|int)$/",$token) )
+        if( preg_match("/^(nil|bool|int|string)$/",$token) )
             write_op($xml, 2, 'type', $token);
         else
             err_msg("err: type_check: $token bad syntax", ERR_SYNTAX);
@@ -151,7 +151,18 @@
     while($line = fgets(STDIN))
     {
         if($line[0] == '#') continue;
-        $line = strip_comment($line);
+        $line = strip($line);
+
+        if (!$header_found)
+        {
+            if(strtoupper($line) == ".IPPCODE23")
+            {
+                $header_found = true;
+                continue;
+            }
+            elseif($line == "") continue;
+            else err_msg("err: header : missing or bad header", ERR_BAD_HEADER);
+        }
 
         $tokens = explode(' ',$line,);
 
@@ -189,6 +200,7 @@
             ##var
             case "DEFVAR":
             case "POPS":
+            
                 if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
@@ -265,6 +277,9 @@
                 symb_check($tokens[3], $xml_buffer, 3);
                 $xml_buffer->endElement();
 
+                break;
+
+            case "":
                 break;
 
             default:
