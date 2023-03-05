@@ -16,6 +16,8 @@
         exit($err_code);
     }
 
+
+    
     function write_instr($xml,$idx,$opcode,$head)
     {
         if(!$head) err_msg("err: header: bad header", ERR_BAD_HEADER);
@@ -46,6 +48,12 @@
             $line = trim($line);
         }
         return $line;
+    }
+
+    function count_check($tokens,$num_of_op)
+    {
+        if (count($tokens) != ($num_of_op+1) ) // +1 for instruction
+            err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
     }
 
     function label_check($token,$xml)
@@ -180,7 +188,7 @@
             case "POPFRAME":
             case "BREAK":
             case "RETURN":
-                if( count($tokens) != 1 ) err_msg("bad num of op : count($tokens)",ERR_SYNTAX);
+                count_check($tokens,0);
                 write_instr($xml_buffer,++$idx,$tokens[0],$header_found);
                 $xml_buffer->endElement();
 
@@ -190,7 +198,7 @@
             case "CALL":
             case "LABEL":
             case "JUMP":
-                if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+                count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1],$xml_buffer);
                 $xml_buffer->endElement();
@@ -200,8 +208,8 @@
             ##var
             case "DEFVAR":
             case "POPS":
-            
-                if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+
+                count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 $xml_buffer->endElement();
@@ -213,7 +221,7 @@
             case "WRITE":
             case "EXIT":
             case "DPRINT":
-                if (count($tokens) != 2) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+                count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 symb_check($tokens[1],$xml_buffer,1);
                 $xml_buffer->endElement();
@@ -226,7 +234,7 @@
             case "STRLEN":
             case "TYPE":
             case "NOT":
-                if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+                count_check($tokens, 2);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
@@ -235,7 +243,6 @@
                 break;
 
             ## var symb symb
-            if (count($tokens) != 4) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
             case "ADD":
             case "SUB":
             case "MUL":
@@ -249,6 +256,7 @@
             case "CONCAT":
             case "GETCHAR":
             case "SETCHAR":
+                count_check($tokens, 3);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
@@ -259,7 +267,7 @@
 
             ## var type
             case "READ":
-                if (count($tokens) != 3) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+                count_check($tokens, 2);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 type_check($tokens[2],$xml_buffer);
@@ -270,7 +278,7 @@
             ## label symb symb
             case "JUMPIFEQ":
             case "JUMPIFNEQ":
-                if (count($tokens) != 4 ) err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
+                count_check($tokens, 3);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1], $xml_buffer);
                 symb_check($tokens[2], $xml_buffer,2);
