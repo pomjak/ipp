@@ -16,8 +16,6 @@
         exit($err_code);
     }
 
-
-    
     function write_instr($xml,$idx,$opcode,$head)
     {
         if(!$head) err_msg("err: header: bad header", ERR_BAD_HEADER);
@@ -190,8 +188,7 @@
             case "RETURN":
                 count_check($tokens,0);
                 write_instr($xml_buffer,++$idx,$tokens[0],$header_found);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             ## label
@@ -201,8 +198,7 @@
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1],$xml_buffer);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             ##var
@@ -212,8 +208,7 @@
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             ## symb
@@ -224,8 +219,7 @@
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 symb_check($tokens[1],$xml_buffer,1);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             ## var symb
@@ -238,8 +232,7 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             ## var symb symb
@@ -261,7 +254,7 @@
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
                 symb_check($tokens[3], $xml_buffer,3);
-                $xml_buffer->endElement();
+                // $xml_buffer->endElement();
 
                 break;
 
@@ -271,8 +264,7 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 type_check($tokens[2],$xml_buffer);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             ## label symb symb
@@ -283,17 +275,19 @@
                 label_check($tokens[1], $xml_buffer);
                 symb_check($tokens[2], $xml_buffer,2);
                 symb_check($tokens[3], $xml_buffer, 3);
-                $xml_buffer->endElement();
-
+                // $xml_buffer->endElement();
                 break;
 
             case "":
-                break;
+                continue;
 
             default:
                 err_msg("err: switch :unrecognized command $tokens[0]", ERR_OPCODE);
                 break;
         }
+        
+    $xml_buffer->endElement();
+
     }
 
     if(!$header_found) err_msg("err: header :missing header", ERR_BAD_HEADER);
