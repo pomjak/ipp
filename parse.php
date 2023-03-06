@@ -342,7 +342,7 @@
                 break;
 
             case "":
-                continue 2;//php curiostity, switch is recognized as loop, 2 for while 
+                continue 2;//php curiosity, switch is recognized as loop, 2 for while 
 
             default:
                 err_msg("err: switch :unrecognized command $tokens[0]", ERR_OPCODE);
