@@ -10,12 +10,27 @@
     define("ERR_SYNTAX", 23);
     define("ERR_INTERNAL", 99);
 
+    
+    /**
+     * prints err message and exits with err code 
+     * @param mixed $msg message that will be diplayed
+     * @param mixed $err_code errot code that will be returned
+     * 
+     */
     function err_msg($msg,$err_code)
     {
         fprintf(STDERR,"$msg\n");
         exit($err_code);
     }
 
+    /**
+     * stores instruction opcode with order in xml format to buffer
+     * @param mixed $xml buffer that stores xml data
+     * @param mixed $idx index of instruction
+     * @param mixed $opcode name of opcode
+     * @param mixed $head confirmation if header was found
+     * 
+     */
     function write_instr($xml,$idx,$opcode,$head)
     {
         if(!$head) err_msg("err: header: bad header", ERR_BAD_HEADER);
@@ -24,6 +39,15 @@
         $xml->writeAttribute('opcode', $opcode);
     }
 
+
+    /**
+     * stores argument of instruction with index,type and value in xml format to buffer
+     * @param mixed $xml buffer that stores xml data
+     * @param mixed $num index of argument
+     * @param mixed $type type of argument
+     * @param mixed $value value of argument
+     * 
+     */
     function write_op($xml,$num,$type,$value)
     {
         $xml->startElement('arg'.$num);
@@ -32,28 +56,40 @@
         $xml->endElement();
     }
 
+    /**
+     * discards comments,white characters and the newline character
+     * @param mixed $line of input to be processed
+     * @return mixed $line stripped line
+     */
     function strip($line)
     {
-        if(strstr($line, '#', true))
-        {
+        if(strstr($line, '#', true))//if comment found, throw away it
             $line = strstr($line, '#', true);
-            $line = preg_replace('/\s\s+/', ' ', $line);
-            $line = trim($line);
-        }
-        else
-        {
-            $line = preg_replace('/\s\s+/', ' ', $line);
-            $line = trim($line);
-        }
+
+        $line = preg_replace('/\s\s+/', ' ', $line);//replaces every whitespace with space
+        $line = trim($line);//discards new line character
+        
         return $line;
     }
 
+    /**
+     * checks the right number of tokens
+     * @param mixed $tokens tokens to be counted
+     * @param mixed $num_of_op expected token count
+     * 
+     */
     function count_check($tokens,$num_of_op)
     {
         if (count($tokens) != ($num_of_op+1) ) // +1 for instruction
             err_msg("bad num of op : count($tokens)", ERR_SYNTAX);
     }
 
+    /**
+     * checks the correctness of label by regex
+     * @param mixed $token to be checked
+     * @param mixed $xml buffer to be stored into to
+     * 
+     */
     function label_check($token,$xml)
     {
         if( preg_match("/^[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/",$token) )
@@ -61,7 +97,13 @@
         else 
             err_msg("err: label_check: $token bad syntax",ERR_SYNTAX);
     }
-    
+
+    /**
+     * checks the correctness of type by regex
+     * @param mixed $token to be checked
+     * @param mixed $xml buffer to be stored into to
+     * 
+     */
     function type_check($token,$xml)
     {
         if( preg_match("/^(nil|bool|int|string)$/",$token) )
@@ -70,6 +112,13 @@
             err_msg("err: type_check: $token bad syntax", ERR_SYNTAX);
     }
 
+    /**
+     * checks the correctness of variable by regex
+     * @param mixed $token to be checked
+     * @param mixed $xml buffer to be stored into to
+     * @param mixed $order position of arg
+     * 
+     */
     function var_check($token,$xml,$order)
     {
         if (preg_match("/^(GF|LF|TF)@[a-zA-Z_\-\$&%\*!\?][\w\-\$&%\*!\?]*$/", $token))
@@ -78,10 +127,17 @@
             err_msg("err: var_check: $token bad syntax", ERR_SYNTAX);
     }
 
+    /**
+     * checks the correctness of constatnt by regex
+     * @param mixed $token to be checked
+     * @param mixed $xml buffer to be stored into to
+     * @param mixed $order position of arg
+     * 
+     */
     function const_check($token,$xml,$order)
     {
-        $const_sub = explode('@',$token);
-        if( preg_match( "/^(nil|int|string|bool)$/" , $const_sub[0]) )
+        $const_sub = explode('@',$token);//const_sub[0]...type of const, const_sub[1]...value of const
+        if( preg_match( "/^(nil|int|string|bool)$/" , $const_sub[0]) )//regex for right type
         {
             switch($const_sub[0])
             {
@@ -113,6 +169,13 @@
         else err_msg("err: const_check: $token bad syntax", ERR_SYNTAX);
     }
 
+    /**
+     * decides if symbol is represented as variable or constant and checks it
+     * @param mixed $token to be checked
+     * @param mixed $xml buffer to be stored into to
+     * @param mixed $order position of arg
+     * 
+     */
     function symb_check($token,$xml,$order)
     {
         $symb = explode('@',$token);
@@ -121,6 +184,14 @@
         else
             const_check($token, $xml,$order);
     }
+
+    /**
+     * 
+     * 
+     * MAIN STRUCTURE OF PROGRAM
+     * 
+     * 
+     */
 
     if($argc > 1)
     {
@@ -134,7 +205,7 @@
     else err_msg("err:param_check :bad params", ERR_PARAM);
     }
 
-    $xml_buffer = new XMLWriter();
+    $xml_buffer = new XMLWriter();//creating buffer for xml 
 
     if(!$xml_buffer->openMemory())
         exit(ERR_INTERNAL);
@@ -154,27 +225,27 @@
     $header_found = false;
     $idx = 0;
 
-    while($line = fgets(STDIN))
+    while($line = fgets(STDIN))//storing stdin 
     {
-        if($line[0] == '#') continue;
+        if($line[0] == '#') continue;//if $line start with # then it could be discarded 
         $line = strip($line);
 
-        if (!$header_found)
+        if(!$header_found)
         {
             if(strtoupper($line) == ".IPPCODE23")
             {
                 $header_found = true;
                 continue;
             }
-            elseif($line == "") continue;
+            elseif($line == "") continue;//if blank line, skip
             else err_msg("err: header : missing or bad header", ERR_BAD_HEADER);
         }
 
-        $tokens = explode(' ',$line,);
+        $tokens = explode(' ',$line,);//tokenization of line by space
 
-        switch($tokens[0] = strtoupper($tokens[0]))
+        switch($tokens[0] = strtoupper($tokens[0]))//switch for instructions
         {
-            case ".IPPCODE23":
+            case ".IPPCODE23"://treating for double header
                 if (!$header_found)
                     $header_found = true;
                 else
@@ -188,7 +259,6 @@
             case "RETURN":
                 count_check($tokens,0);
                 write_instr($xml_buffer,++$idx,$tokens[0],$header_found);
-                // $xml_buffer->endElement();
                 break;
 
             ## label
@@ -198,7 +268,6 @@
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 label_check($tokens[1],$xml_buffer);
-                // $xml_buffer->endElement();
                 break;
 
             ##var
@@ -208,7 +277,6 @@
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
-                // $xml_buffer->endElement();
                 break;
 
             ## symb
@@ -219,7 +287,6 @@
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 symb_check($tokens[1],$xml_buffer,1);
-                // $xml_buffer->endElement();
                 break;
 
             ## var symb
@@ -232,7 +299,6 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
-                // $xml_buffer->endElement();
                 break;
 
             ## var symb symb
@@ -254,7 +320,6 @@
                 var_check($tokens[1], $xml_buffer,1);
                 symb_check($tokens[2], $xml_buffer,2);
                 symb_check($tokens[3], $xml_buffer,3);
-                // $xml_buffer->endElement();
 
                 break;
 
@@ -264,7 +329,6 @@
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
                 type_check($tokens[2],$xml_buffer);
-                // $xml_buffer->endElement();
                 break;
 
             ## label symb symb
@@ -275,28 +339,27 @@
                 label_check($tokens[1], $xml_buffer);
                 symb_check($tokens[2], $xml_buffer,2);
                 symb_check($tokens[3], $xml_buffer, 3);
-                // $xml_buffer->endElement();
                 break;
 
             case "":
-                continue;
+                continue 2;//php curiostity, switch is recognized as loop, 2 for while 
 
             default:
                 err_msg("err: switch :unrecognized command $tokens[0]", ERR_OPCODE);
                 break;
         }
-        
+    
     $xml_buffer->endElement();
-
+    
     }
 
-    if(!$header_found) err_msg("err: header :missing header", ERR_BAD_HEADER);
+    if(!$header_found) err_msg("err: header :missing header", ERR_BAD_HEADER);//checking header in program without any instructions
 
     $xml_buffer->endElement();
     $xml_buffer->endDocument();
     
-    echo($xml_buffer->outputMemory(true));
-    $xml_buffer->flush();
+    echo($xml_buffer->outputMemory(true));//printing whole buffer to stdout 
+    $xml_buffer->flush();//cleaning
     
     exit(SUCCESS);
 ?>
