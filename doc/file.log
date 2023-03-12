@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Arch Linux) (preloaded format=pdflatex 2023.3.7)  12 MAR 2023 11:09
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022/Arch Linux) (preloaded format=pdflatex 2023.3.7)  12 MAR 2023 15:16
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -193,32 +193,27 @@ e
 File: imgs/logo.png Graphic file (type png)
 <use imgs/logo.png>
 Package pdftex.def Info: imgs/logo.png  used on input line 34.
-(pdftex.def)             Requested size: 286.66904pt x 129.98474pt.
+(pdftex.def)             Requested size: 266.19133pt x 120.69951pt.
  [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./imgs/logo.png>]
-<imgs/class_diagram.png, id=12, 677.53125pt x 609.27625pt>
-File: imgs/class_diagram.png Graphic file (type png)
-<use imgs/class_diagram.png>
-Package pdftex.def Info: imgs/class_diagram.png  used on input line 39.
-(pdftex.def)             Requested size: 474.26863pt x 426.49046pt.
- [2 <./imgs/class_diagram.png>] (./file.aux) ) 
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map} <./imgs/logo.png>] [2] (./f
+ile.aux) ) 
 Here is how much of TeX's memory you used:
- 3607 strings out of 478238
- 58169 string characters out of 5850457
- 366103 words of memory out of 5000000
- 21836 multiletter control sequences out of 15000+600000
- 489107 words of font info for 36 fonts, out of 8000000 for 9000
+ 3598 strings out of 478238
+ 57957 string characters out of 5850457
+ 366097 words of memory out of 5000000
+ 21828 multiletter control sequences out of 15000+600000
+ 482905 words of font info for 34 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  55i,5n,62p,204b,198s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf-dist/fonts/enc/
-dvips/tex-gyre/q-ec.enc}</usr/share/texmf-dist/fonts/type1/public/tex-gyre/qbkb
-.pfb></usr/share/texmf-dist/fonts/type1/public/tex-gyre/qbkr.pfb></usr/share/te
-xmf-dist/fonts/type1/public/tex-gyre/qbkri.pfb>
-Output written on file.pdf (2 pages, 129897 bytes).
+{/usr/share/texmf-dist/fonts/enc/dvips/tex-gyre/q-ec.enc}</usr/share/
+texmf-dist/fonts/type1/public/tex-gyre/qbkb.pfb></usr/share/texmf-dist/fonts/ty
+pe1/public/tex-gyre/qbkr.pfb></usr/share/texmf-dist/fonts/type1/public/tex-gyre
+/qbkri.pfb>
+Output written on file.pdf (2 pages, 80653 bytes).
 PDF statistics:
- 32 PDF objects out of 1000 (max. 8388607)
+ 30 PDF objects out of 1000 (max. 8388607)
  17 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

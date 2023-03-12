@@ -274,7 +274,6 @@
             ##var
             case "DEFVAR":
             case "POPS":
-
                 count_check($tokens, 1);
                 write_instr($xml_buffer, ++$idx, $tokens[0],$header_found);
                 var_check($tokens[1], $xml_buffer,1);
