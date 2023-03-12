@@ -19,6 +19,7 @@
      */
     function err_msg($msg,$err_code)
     {
+        
         fprintf(STDERR,"$msg\n");
         exit($err_code);
     }
@@ -342,7 +343,7 @@
                 break;
 
             case "":
-                continue 2;//php curiosity, switch is recognized as loop, 2 for while 
+                continue 2;//php curiosity, switch is recognized as loop, 2 for reaching while 
 
             default:
                 err_msg("err: switch :unrecognized command $tokens[0]", ERR_OPCODE);
