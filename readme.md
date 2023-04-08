@@ -23,8 +23,13 @@ Po úspěšné provedené analýze a zapsání posledního elementu je *XML* dok
 
 ### Hodnocení
 Procentuální hodnocení jednotlivých kategorií skriptu parse.php:
+
 Lexikální analýza (detekce chyb): 85 %
+
 Syntaktická analýza (detekce chyb): 100 %
+
 Zpracování instrukcí (včetně chyb): 96 %
+
 Zpracování netriviálních programů: 87 %
+
 Celkem bez rozšíření: 94 %
