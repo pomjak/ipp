@@ -19,3 +19,12 @@ Následně kontroluje první výskyt hlavičky *.IPPcode23* a poté upravené ř
 
 ### Generace mezikodu ve formátu XML
 Po úspěšné provedené analýze a zapsání posledního elementu je *XML* dokument ukončen, buffer vytisknut na standardní výstup a vyčištěn. Skript vrací hodnotu *0* jako úspěch.
+
+
+### Hodnocení
+Procentuální hodnocení jednotlivých kategorií skriptu parse.php:
+Lexikální analýza (detekce chyb): 85 %
+Syntaktická analýza (detekce chyb): 100 %
+Zpracování instrukcí (včetně chyb): 96 %
+Zpracování netriviálních programů: 87 %
+Celkem bez rozšíření: 94 %
